@@ -1,0 +1,8 @@
+{
+	"port": "/dev/tty.usbserial-14130",
+	"sketch": "car/car.ino",
+	"output": "../build",
+	"prebuild": "./prebuild.sh",
+	"postbuild": "./postbuild.sh",
+	"intelliSenseGen": "global"
+}
