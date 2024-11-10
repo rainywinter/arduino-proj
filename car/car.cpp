@@ -55,8 +55,12 @@ void sterring::turnLeft()
     if (m_engine->m_speed[0] != m_engine->m_speed[1]){
       m_engine->sync_speed("from turnRight to turnLeft");
     }
-    m_engine->m_speed[0] = m_engine->m_speed[1] - m_gap;
-    m_engine->m_speed[0] = m_engine->m_speed[0] > 0 ? m_engine->m_speed[0] : 0;
+
+    if(m_engine->m_speed[1] - m_gap > 0){
+      m_engine->m_speed[0] = m_engine->m_speed[1] - m_gap;
+    }else{
+      m_engine->m_speed[0] = 0;
+    }
     m_engine->apply_speed("turnLeft");
 }
 
@@ -69,8 +73,11 @@ void sterring::turnRight()
     if (m_engine->m_speed[0] != m_engine->m_speed[1]){
       m_engine->sync_speed("from turnLeft to turnRight");
     }
-    m_engine->m_speed[1] = m_engine->m_speed[0] - m_gap;
-    m_engine->m_speed[1] = m_engine->m_speed[1] > 0 ? m_engine->m_speed[1] : 0;
+    if (m_engine->m_speed[0] - m_gap > 0){
+      m_engine->m_speed[1] = m_engine->m_speed[0] - m_gap;
+    }else{
+      m_engine->m_speed[1] = 0;
+    }
     m_engine->apply_speed("turnRight");
 }
 

@@ -20,7 +20,7 @@ public:
     sterring(engine *e) {
         Serial.println("sterring constructor=>");
         m_engine = e;
-        m_gap = 15;
+        m_gap = 20;
     }
     void turnLeft();
     void turnRight();

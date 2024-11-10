@@ -48,6 +48,7 @@ void controller::exec_instruction()
         cmd = command::COMMAND_SLOWDOWN;
         break;
     default:
+        cmd = command::COMMAND_STOP;
         break;
     }
     Serial.print("controller:exec_instruction ");
