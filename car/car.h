@@ -3,14 +3,9 @@
 #pragma once 
 
 #include <Arduino.h>
-#include "base.h"
 
 
 class car;
-class sterring;
-class accelerator;
-class gear;
-class radar;
 class engine;
 
 class sterring
@@ -22,7 +17,11 @@ private:
     sterring() {};
 
 public:
-    sterring(engine *e) : m_engine(e), m_gap(30) {}
+    sterring(engine *e) {
+        Serial.println("sterring constructor=>");
+        m_engine = e;
+        m_gap = 15;
+    }
     void turnLeft();
     void turnRight();
 };
@@ -35,7 +34,9 @@ private:
     accelerator() {};
 
 public:
-    accelerator(engine *e) : m_engine(e) {}
+    accelerator(engine *e) : m_engine(e) {
+        Serial.println("accelerator constructor=>");
+    }
     void speedup();
     void slowdown();
 };
@@ -64,7 +65,10 @@ private:
     gear() {};
 
 public:
-    gear(engine *e) : m_engine(e) { m_state = GEAR_STATE_P; }
+    gear(engine *e) : m_engine(e) { 
+        Serial.println("gear constructor=>"); 
+        m_state = GEAR_STATE_P; 
+    }
     void update_state(gear_state state);
 };
 
@@ -85,10 +89,11 @@ private:
 public:
     radar(engine *e, uint8_t pins[2])
     {
+        Serial.println("rardar constructor=>");
         m_trigger_pin=pins[0];
         m_echo_pin=pins[1];
-        pinOutput(m_trigger_pin);
-        pinInput(m_echo_pin);
+        pinMode(m_trigger_pin,OUTPUT);
+        pinMode(m_echo_pin,INPUT);
         m_engine = e;
         m_duration = 0;
         m_distance = 0;
@@ -121,29 +126,56 @@ private:
     void sync_speed(char reason[]);
     void apply_speed(char reason[]);
     void shutdown();
-
-    engine();
+    void pause();
 
 public:
     engine(uint8_t f_pin[2], uint8_t b_pin[2], uint8_t s_pin[2])
     {
-        memcpy(m_forward_pin, f_pin, sizeof(f_pin));
-        memcpy(m_backward_pin, b_pin, sizeof(b_pin));
-        memcpy(m_speed_pin, s_pin, sizeof(s_pin));
+        // memcpy(m_forward_pin, f_pin, sizeof(f_pin));
+        // memcpy(m_backward_pin, b_pin, sizeof(b_pin));
+        // memcpy(m_speed_pin, s_pin, sizeof(s_pin));
+        Serial.println("engine constructor=>");
+        for(int i=0; i<2; i++){
+            m_forward_pin[i] = f_pin[i];
+            m_backward_pin[i] = b_pin[i];
+            m_speed_pin[i] = s_pin[i];
+        }
+       
 
         for (int i = 0; i < 2; i++)
         {
-            pinOutput(m_forward_pin[i]);
-            pinOutput(m_backward_pin[i]);
-            pinOutput(m_speed_pin[i]);
+            pinMode(m_forward_pin[i],OUTPUT);
+            pinMode(m_backward_pin[i],OUTPUT);
+            pinMode(m_speed_pin[i],OUTPUT);
 
             m_speed[i] = 0;
         }
     }
 };
 
+enum class event
+{
+    // EVENT_STOP,
+    // EVENT_SLOWDOWN,
+    // EVENT_SPEEDUP,
+    // EVENT_FORWARD,
+    // EVENT_BACKWARD,
+    EVENT_OBSTACLE,    // 遇到障碍
+    EVENT_RM_OBSTACLE, // 移除障碍
+};
 
-static car *g_car = NULL;
+enum class command
+{
+    COMMAND_NONE,
+    COMMAND_STOP,
+    COMMAND_SLOWDOWN,
+    COMMAND_SPEEDUP,
+    COMMAND_FORWARD,
+    COMMAND_BACKWARD,
+    COMMAND_TURN_LEFT,
+    COMMAND_TURN_RIGHT,
+};
+
 class car
 {
 private:
@@ -153,11 +185,20 @@ private:
     gear *m_gear;
     radar *m_radar;
 
-    car(/* args */) {}
 
 public:
-    car(uint8_t f_pin[2], uint8_t b_pin[2], uint8_t s_pin[2],uint8_t tr_echo_pins[2]);
-    ~car();
+    car(uint8_t f_pin[2], uint8_t b_pin[2], uint8_t s_pin[2],uint8_t tr_echo_pins[2]){
+        Serial.println("car constructor begin=>");
+        m_engine = new engine(f_pin, b_pin, s_pin);
+        m_sterring = new sterring(m_engine);
+        m_accelerator = new accelerator(m_engine);
+        m_gear = new gear(m_engine);
+        m_radar = new radar(m_engine,tr_echo_pins);
+    }
+    ~car(){
+        Serial.println("car deconstructor");
+        m_engine->shutdown();
+    }
 
     void handle_event(event e);
     void handle_command(command c);

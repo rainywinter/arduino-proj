@@ -2,7 +2,6 @@
 #define CONTROLLER_H
 #pragma once
 
-#include "base.h"
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
@@ -18,6 +17,7 @@ private:
 public:
     controller(uint8_t tx_pin, uint8_t rx_pin)
     {
+        Serial.println("controller constructor=>");
         m_bt = new SoftwareSerial(tx_pin, rx_pin);
         m_bt->begin(9600);
         m_instruction = '0';
@@ -25,7 +25,5 @@ public:
 
     void read_instruction();
 };
-
-static controller *g_controller = NULL;
 
 #endif

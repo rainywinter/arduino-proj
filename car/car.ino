@@ -1,17 +1,17 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <TaskScheduler.h>
-#include "EasyLogger.hpp"
 #include "car.h"
 #include "controller.h"
 
 
-
+car *g_car=NULL;
+controller * g_controller = NULL;
 void check_distance();
 void read_instruction();
 
 Task distanceTask(5, TASK_FOREVER, &check_distance);
-Task btTask(2000000, TASK_FOREVER, &read_instruction);
+Task btTask(5, TASK_FOREVER, &read_instruction);
 Scheduler runner;
 
 void setup_scheduler()
@@ -27,6 +27,8 @@ void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(9600);
+    Serial.println("setup begin");
+    delayMicroseconds(10);
     
     uint8_t f_pin[2] = {4,7};
     uint8_t b_pin[2] = {5,6};
@@ -37,6 +39,7 @@ void setup()
     g_controller = new controller(8,9);
 
     setup_scheduler();
+    Serial.println("setup end");
 }
 
 void loop()
